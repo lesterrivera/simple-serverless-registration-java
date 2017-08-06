@@ -1,0 +1,16 @@
+*.class
+target
+/bin/
+/.settings/
+.project
+.classpath
+.idea
+*.ipr
+*.iml
+# Package Files
+*.jar
+*.war
+*.ear
+.DS_Store
+# Serverless directories
+.serverless
