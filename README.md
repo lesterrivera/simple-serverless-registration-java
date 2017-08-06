@@ -1,4 +1,4 @@
-#Simple Serverless Registration _built with Java_
+# Simple Serverless Registration _built with Java_
 
 A bootstrap template for a serverless website that enables email-based registration 
 designed to offer free access to assets on an S3 bucket (using
