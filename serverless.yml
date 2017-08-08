@@ -8,81 +8,144 @@ service: simple-serverless-registration
 
 frameworkVersion: ">=1.9.0 <2.0.0"
 
+plugins:
+  - serverless-s3-sync
+
+# Global parameters used by cloudformation script
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  # Used by the serverless plugin to sync files to S3
+  s3Sync:
+    - bucketName: my-static-site-assets # the private S3 bucket for secure assets
+      localDir: assets
+    - bucketName: WebSite # The front-end website
+      localDir: static/dist
+
 provider:
   name: aws
   runtime: java8
   environment:
-    MEMBER_TABLE: {Ref: ArticlesDB}
-    COMMENTS_TABLE: {Ref: CommentsDB}
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+    #
+    # Feature Flags
+    #
+    # Allow an external party to verify email (do not send verification email)
+    EXTERNAL_VERIFY: false
+    # The source email for SES; must be validated via AWS Console
+    SES_SOURCE_EMAIL: noreply@myhost.com
+    # The name of your service; used in the validation email to subscriber
+    SERVICE_NAME: myhost
+    # The verification url; used in the validation email to subscriber
+    VERIFY_URL: https://www.myhost.com/verify.html
+    #
+    # System Variables
+    #
+    SUBSCRIBER_TABLE: {Ref: subscriberTable}
+    REGION: {Ref: "AWS::Region"}
 
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
+  # IAM Role for AWS Lambda functions
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:Query
+      Resource:
+        - "Fn::Join":
+            - ""
+            -
+              - "arn:aws:dynamodb:"
+              - {Ref: "AWS::Region"}
+              - ":"
+              - {Ref: "AWS::AccountId"}
+              - ":table/"
+              - Ref: subscriberTable
 
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
+# Packaging information for AWS Lambda
 package:
   artifact: target/simpleserverlessregistration-dev.jar
+  exclude:
+    - node_modules/**
+    - static/**
+    - assets/**
+    - package.json
 
+# Configuration for AWS Lambda functions
 functions:
-  hello:
-    handler: com.serverless.Handler
+  registerSubscriber:
+    handler: com.serverless.RegisterSubscriberHandler
+    events:
+      - http:
+          cors: true
+          path: /register
+          method: post
+  confirmSubscriber:
+    handler: com.serverless.ConfirmSubscriberHandler
+    events:
+      - http:
+          cors: true
+          path: /confirm
+          method: post
+  authorizeSubscriber:
+    handler: com.serverless.AuthorizeSubscriberHandler
+  getPresignedUrl:
+    handler: com.serverless.GetPresignedUrlHandler
+    events:
+      - http:
+          path: /sign
+          method: get
+          authorizer: authorizeSubscriber
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
 
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/hello'
+# AWS Resources comprising the serverless architecture
+resources:
+  Resources:
+    ## S3 bucket for the Angular front-end website
+    WebSite:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          ErrorDocument: index.html
+          IndexDocument: index.html
+    ## Specifying the policies to make sure all files inside the Bucket are available to CloudFront
+    WebSiteS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: WebSite
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+              - s3:GetObject
+              Resource: {"Fn::Join": ["", ["arn:aws:s3:::", {Ref: WebSite}, "/*"]]}
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+    ## AWS DynamoDB table for subscribers
+    subscriberTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+    ## TODO: AWS Cloudfront Distribution for front-end website
+    ## TODO: AWS Cloudfront Distribution for PrivateAssets Bucket
