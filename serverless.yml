@@ -9,16 +9,17 @@ service: simple-serverless-registration
 frameworkVersion: ">=1.9.0 <2.0.0"
 
 plugins:
-  - serverless-s3-sync
+#  - serverless-s3-sync
+# Plugin currently not working
 
 # Global parameters used by cloudformation script
 custom:
   stage: ${opt:stage, self:provider.stage}
   # Used by the serverless plugin to sync files to S3
   s3Sync:
-    - bucketName: my-static-site-assets # the private S3 bucket for secure assets
+    - bucketName: {Ref: PrivateAssets} # the private S3 bucket for secure assets
       localDir: assets
-    - bucketName: WebSite # The front-end website
+    - bucketName: {Ref: WebSite} # The front-end website
       localDir: static/dist
 
 provider:
@@ -41,6 +42,7 @@ provider:
     #
     SUBSCRIBER_TABLE: {Ref: subscriberTable}
     REGION: {Ref: "AWS::Region"}
+    PRIVATE_BUCKET: {Ref: PrivateAssets}
 
   # IAM Role for AWS Lambda functions
   iamRoleStatements:
@@ -71,6 +73,8 @@ package:
     - static/**
     - assets/**
     - package.json
+    - .idea/**
+    - resources/**
 
 # Configuration for AWS Lambda functions
 functions:
@@ -109,7 +113,21 @@ functions:
 
 # AWS Resources comprising the serverless architecture
 resources:
+  ## Utility yml files
+  Mappings: ${file(resources/mappings.yml)}
+  Outputs: ${file(resources/outputs.yml)}
   Resources:
+    ## S3 bucket for the private assets
+    PrivateAssets:
+      Type: AWS::S3::Bucket
+      Properties:
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - "*"
     ## S3 bucket for the Angular front-end website
     WebSite:
       Type: "AWS::S3::Bucket"
@@ -132,6 +150,59 @@ resources:
               Action:
               - s3:GetObject
               Resource: {"Fn::Join": ["", ["arn:aws:s3:::", {Ref: WebSite}, "/*"]]}
+    ## Specifying the CloudFront Distribution to server your Web Application
+    WebSiteCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: {"Fn::Join": ["", [{Ref: WebSite}, ".", {"Fn::FindInMap": [RegionMap, {Ref: "AWS::Region"}, websiteendpoint]}]]}
+              ## An identifier for the origin which must be unique within the distribution
+              Id: S3Origin
+              CustomOriginConfig:
+                HTTPPort: 80
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+              ## In case you want to restrict the bucket access use S3OriginConfig and remove CustomOriginConfig
+              # S3OriginConfig:
+              #   OriginAccessIdentity: origin-access-identity/cloudfront/E127EXAMPLE51Z
+          Enabled: 'true'
+          ## Uncomment the following section in case you are using a custom domain
+          # Aliases:
+          # - mysite.example.com
+          DefaultRootObject: index.html
+          ## Since the Single Page App is taking care of the routing we need to make sure ever path is served with index.html
+          ## The only exception are files that actually exist e.h. app.js, reset.css
+          CustomErrorResponses:
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            ## The origin id defined above
+            TargetOriginId: S3Origin
+            ## Defining if and how the QueryString and Cookies are forwarded to the origin which in this case is S3
+            ForwardedValues:
+              QueryString: 'true'
+              Cookies:
+                Forward: all
+            ## The protocol that users can use to access the files in the origin. To allow HTTP use `allow-all`
+            ViewerProtocolPolicy: redirect-to-https
+          ## The certificate to use when viewers use HTTPS to request objects.
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
+          ## Uncomment the following section in case you want to enable logging for CloudFront requests
+          # Logging:
+          #   IncludeCookies: 'false'
+          #   Bucket: mylogs.s3.amazonaws.com
+          #   Prefix: myprefix
 
     ## AWS DynamoDB table for subscribers
     subscriberTable:
@@ -147,5 +218,3 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-    ## TODO: AWS Cloudfront Distribution for front-end website
-    ## TODO: AWS Cloudfront Distribution for PrivateAssets Bucket
