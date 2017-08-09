@@ -1,0 +1,7 @@
+---
+WebSiteUrl:
+  Value: {"Fn::GetAtt": [WebSite, WebsiteURL]}
+WebSiteBucket:
+  Value: {Ref: WebSite}
+WebSiteCloudFrontDistributionOutput:
+  Value: {'Fn::GetAtt': [ WebSiteCloudFrontDistribution, DomainName ]}

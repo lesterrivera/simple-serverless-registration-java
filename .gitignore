@@ -2,7 +2,7 @@
 target
 /bin/
 /node_modules/
-/static/node_modules/
+/static/node_modules/*
 /.settings/
 .project
 .classpath

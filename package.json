@@ -1,0 +1,22 @@
+{
+  "name": "simple-serverless-registration-java",
+  "version": "1.0.0",
+  "description": "A boilerplate serverless architecture for a simple email-based registration system",
+  "main": "echo \"Error: no main specified\" && exit 1",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lesterrivera/simple-serverless-registration-java.git"
+  },
+  "author": "Lester J. Rivera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lesterrivera/simple-serverless-registration-java/issues"
+  },
+  "homepage": "https://github.com/lesterrivera/simple-serverless-registration-java#readme",
+  "dependencies": {
+    "serverless-s3-sync": "^1.2.0"
+  }
+}
