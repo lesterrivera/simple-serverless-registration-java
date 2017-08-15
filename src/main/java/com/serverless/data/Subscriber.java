@@ -26,14 +26,12 @@ public class Subscriber {
     @DynamoDBHashKey(attributeName = "email")
     String email;
 
-    @NotNull(message = "subscribeDate cannot be null")
-    @DynamoDBRangeKey(attributeName = "subscribeDate")
+    @DynamoDBAttribute(attributeName = "subscribeDate")
     Date subscribeDate;
 
     @DynamoDBAttribute(attributeName = "verifyHash")
     String verifyHash;
 
-    @NotNull(message = "isVerified cannot be null")
     @DynamoDBAttribute(attributeName = "isVerified")
     Boolean isVerified;
 
@@ -73,7 +71,7 @@ public class Subscriber {
     public String toString() {
         return "Subscriber [email=" + email
                 + ", subscribeDate=" + subscribeDate
-                + ", verifyHash" + verifyHash
+                + ", verifyHash=" + verifyHash
                 + ", isVerified=" + isVerified + "]";
     }
 }

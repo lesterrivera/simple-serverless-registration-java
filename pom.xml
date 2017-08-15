@@ -79,6 +79,11 @@
       <artifactId>aws-java-sdk-ses</artifactId>
       <version>1.11.172</version>
     </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt</artifactId>
+      <version>0.7.0</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -5,6 +5,8 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.*;
 import org.apache.log4j.Logger;
 
+import java.net.URLEncoder;
+
 /**
  * Class to handle all SES email processing
  */
@@ -64,6 +66,44 @@ public class SESAdapter {
         client.sendEmail(request);
 
         LOG.info("Email sent");
+    }
+
+    /**
+     * Sends the confirmation email
+     * @param userEmail
+     * @param verifyToken
+     */
+    public void sendConfirmationEmail(final String userEmail,
+                         final String verifyToken) {
+        // Environment variable
+        String ServiceName = System.getenv("SERVICE_NAME"); // The service name from the environment variables
+        String VerifyLinkURL = System.getenv("VERIFY_URL"); // The verify url
+
+        try{
+            // Generate confirmation email to send via SES
+            String VerifyLink = VerifyLinkURL + "?email" + URLEncoder.encode(userEmail, "UTF-8")  + "&verifyToken=" + verifyToken;
+            String verifySubjectLine = "Please confirm the email address for " + ServiceName;
+            String verifyMessage = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
+                    + "<title>" + verifySubjectLine + "</title>"
+                    + "</head><body>"
+                    + "Please <a href\"" + VerifyLink + "\">click here to verify your email address</a> or copy & paste the following link in a browser:"
+                    + "<br><br>"
+                    + "<a href=\"" + VerifyLink + "\">" + VerifyLink + "</a>"
+                    + "</body></html>";
+
+            LOG.debug("Verify email is ["
+                    + "subject=" + verifySubjectLine
+                    + "message=" + verifyMessage
+                    + "]");
+
+            // Send the email.
+            this.sendMail(userEmail, verifySubjectLine, verifyMessage);
+
+            LOG.info("Email sent");
+
+        }catch(Exception e){
+            LOG.error(e,e);
+        }
     }
 
 }

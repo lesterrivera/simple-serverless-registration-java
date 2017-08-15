@@ -22,4 +22,5 @@ public class Handler implements RequestHandler<Map<String, Object>, ApiGatewayRe
 				.setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & serverless"))
 				.build();
 	}
+
 }

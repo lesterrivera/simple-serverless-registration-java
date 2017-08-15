@@ -9,17 +9,16 @@ service: simple-serverless-registration
 frameworkVersion: ">=1.9.0 <2.0.0"
 
 plugins:
-#  - serverless-s3-sync
-# Plugin currently not working
+  - serverless-sync-s3buckets
 
 # Global parameters used by cloudformation script
 custom:
   stage: ${opt:stage, self:provider.stage}
   # Used by the serverless plugin to sync files to S3
-  s3Sync:
-    - bucketName: {Ref: PrivateAssets} # the private S3 bucket for secure assets
+  syncS3Buckets:
+    - bucketRef: PrivateAssets # the private S3 bucket for secure assets
       localDir: assets
-    - bucketName: {Ref: WebSite} # The front-end website
+    - bucketRef: WebSite # The front-end website
       localDir: static/dist
 
 provider:
@@ -30,13 +29,15 @@ provider:
     # Feature Flags
     #
     # Allow an external party to verify email (do not send verification email)
-    EXTERNAL_VERIFY: false
+    EXTERNAL_VERIFY: true
     # The source email for SES; must be validated via AWS Console
     SES_SOURCE_EMAIL: noreply@myhost.com
     # The name of your service; used in the validation email to subscriber
     SERVICE_NAME: myhost
     # The verification url; used in the validation email to subscriber
     VERIFY_URL: https://www.myhost.com/verify.html
+    # The signature key for the JWT Token
+    JWTKEY: SomeSecretKey
     #
     # System Variables
     #
@@ -83,14 +84,14 @@ functions:
     events:
       - http:
           cors: true
-          path: /register
+          path: /api/register
           method: post
   confirmSubscriber:
     handler: com.serverless.ConfirmSubscriberHandler
     events:
       - http:
           cors: true
-          path: /confirm
+          path: /api/confirm
           method: post
   authorizeSubscriber:
     handler: com.serverless.AuthorizeSubscriberHandler
@@ -98,7 +99,7 @@ functions:
     handler: com.serverless.GetPresignedUrlHandler
     events:
       - http:
-          path: /sign
+          path: /api/sign
           method: get
           authorizer: authorizeSubscriber
           cors:
