@@ -30,24 +30,23 @@ $ npm install
 $ mvn clean install
 
 ```
-3. Build the front-end website written in Angular in the _static_ folder of the project
-```
-$ cd static
 
-$ npm install
-
-# ng build --prod
-
-$ cd ..
-```
-
-4. Deploy the AWS stack
+3. Deploy the AWS stack
 
 ```
 $ serverless deploy
 ```
 
-5. Configure AWS SES in your AWS Console as detailed [here](http://docs.aws.amazon.com/ses/latest/DeveloperGuide/before-you-begin.html) and set the following values in serverless.yml.
+4. Use web browser to open the front-end website on your S3 bucket
+
+## Configure optional support for Verification Email using SES
+Its possible to send the registering user an email verification link over SES. Doing so will ensure that 
+the user cannot retrieve a pre-signed url to the private assets in the s3 bucket until the email
+has been separately verified using the `verifyToken` generated and sent over SES.
+
+1. Configure AWS SES in your AWS Console as detailed [here](http://docs.aws.amazon.com/ses/latest/DeveloperGuide/before-you-begin.html) 
+
+2. Set appropriate values to the following  in serverless.yml.
 
 ```$yml
     # Allow an external party to verify email (do not send verification email)
@@ -59,13 +58,12 @@ $ serverless deploy
     # The verification url; used in the validation email to subscriber
     VERIFY_URL: https://www.myhost.com/verify.html
 ```
-6. Use web browser to open the front-end website on your S3 bucket
 
 ## Synchronize contents to your S3 bucket
 You can deploy both private assets and the front-end website to your S3 buckets without deploying the serverless architecture as follows:
 
 ```
-$ serverless s3sync
+$ serverless syncToS3
 ```
 
 However, deploying the serverless architecture again also works well and does not affect the already-deployed components.
