@@ -1,0 +1,12 @@
+.modal {
+  background-color:#ffffff;
+  border:1px solid lightgray;
+  box-shadow:0 0 7px rgba(0,0,0,.2);
+  width:40%;
+  text-align:center;
+  padding:30px;
+  border-radius:6px;
+  font-weight:400;
+  margin:40px auto;
+  overflow-y: hidden;
+}

@@ -1,0 +1,29 @@
+
+.play-button {
+  display: none;
+  border-radius: 50%;
+  -webkit-transition: -webkit-transform 0.2s ease-in,box-shadow 0.2s ease-in,opacity 0.3s ease-in;
+  -webkit-transition: transform 0.2s ease-in,box-shadow 0.2s ease-in,opacity 0.3s ease-in;
+  transition: transform 0.2s ease-in,box-shadow 0.2s ease-in,opacity 0.3s ease-in;
+}
+
+
+  .play-button {
+    display: block;
+    position: absolute;
+    width: 97px;
+    height: 97px;
+    right: 230px;
+    bottom: 50%;
+    margin-bottom: -48px;
+  }
+
+a {
+  -webkit-tap-highlight-color: #E7865A;
+  text-decoration: none;
+  color: #262226;
+  -webkit-transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
+  cursor: pointer;
+}
+

@@ -7,13 +7,13 @@ import { environment } from '../../environments/environment';
 
 
 @Injectable()
-export class AuthenticationService {
+export class SimpleRegistrationService {
 
   private apiUrl = environment.apiUrl;
 
   constructor(private http: Http) {}
 
-  login(email: string) {
+  register(email: string) {
     var options = new RequestOptions({
       headers: new Headers({
         'Content-Type': 'application/json'
@@ -38,5 +38,13 @@ export class AuthenticationService {
   logout() {
     // remove user from local storage to log user out
     localStorage.removeItem('currentUser');
+  }
+
+  confirm(email: string, verifyToken: string) {
+    // Confirm the email address
+  }
+
+  getPreSignedURL(uri: string) {
+    // Get an authorized urls
   }
 }

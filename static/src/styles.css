@@ -10,14 +10,14 @@ body {
   margin-top: 3%;
 }
 
-/*.fullscreen_bg {*/
-  /*position: fixed;*/
-  /*top: 0;*/
-  /*right: 0;*/
-  /*bottom: 0;*/
-  /*left: 0;*/
-  /*background-size: cover;*/
-  /*background-position: 50% 50%;*/
-  /*background-image: url('https://jointgroup.es/wp-content/uploads/2016/11/joint-network-group.jpg');*/
-  /*background-repeat:repeat;*/
-/*}*/
+.fullscreen_bg {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-size: cover;
+  background-position: 50% 50%;
+  background-image: url('/assets/backgrounds/pexels-photo-305821.jpeg');
+  background-repeat:repeat;
+}

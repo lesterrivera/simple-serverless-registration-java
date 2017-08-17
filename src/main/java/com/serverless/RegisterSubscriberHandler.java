@@ -2,6 +2,8 @@ package com.serverless;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.data.Subscriber;
 import com.serverless.models.DynamoDBAdapter;
 import com.serverless.models.JWTAdapter;
@@ -32,6 +34,8 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 	public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
 		LOG.info("received: " + input);
 
+		Map<String, Object> output = new HashMap<String, Object>();
+
 		// Setup POJO for subscriber
 		Subscriber subscriber = new Subscriber();
 
@@ -45,8 +49,15 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 
 		try{
 
+			// Get input values
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode body = mapper.readTree((String) input.get("body"));
+
+			LOG.info("body: " + body);
+			output.put("email", body.get("email").asText());
+
 			// Add values to POJO
-			subscriber.setEmail(input.get("email").toString());
+			subscriber.setEmail(body.get("email").asText());
 
 			LOG.debug("subscriber: " + subscriber.toString());
 
@@ -68,7 +79,7 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 				// Generate JWT Token
 				String userToken = JWTAdapter.getInstance().generateJWT(subscriber.getEmail(), OneMonthMillis);
 				// respond with token
-				input.put("token", userToken);
+				output.put("token", userToken);
 
 				// Load user
 				Subscriber user = null;
@@ -76,7 +87,7 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 				// Check if user exists
 				if(user != null){
 					// Respond with if the user has verified email
-					input.put("isVerified", user.getIsVerified());
+					output.put("isVerified", user.getIsVerified());
 
 				} else {
 					// generate and save user
@@ -104,7 +115,7 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 					subscriber.setSubscribeDate(new Date(System.currentTimeMillis()));
 
 					// Tell the client if the email is verified
-					input.put("isVerified", subscriber.getIsVerified());
+					output.put("isVerified", subscriber.getIsVerified());
 
 					// Send to DynamoDB
 					DynamoDBAdapter.getInstance().putSubscriber(subscriber);
@@ -120,25 +131,28 @@ public class RegisterSubscriberHandler implements RequestHandler<Map<String, Obj
 				}
 				// Add the violations to the response
 				input.put("violations", violations);
-				Response responseBody = new Response("Invalid data used", input);
+				Response responseBody = new Response("Invalid data used", output);
 				return ApiGatewayResponse.builder()
 						.setStatusCode(422)
+				        .setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
 						.setObjectBody(responseBody)
 						.build();
 			}
 
 		}catch(Exception e){
 			LOG.error(e,e);
-			Response responseBody = new Response("Failure adding subscriber", input);
+			Response responseBody = new Response("Failure adding subscriber", output);
 			return ApiGatewayResponse.builder()
 					.setStatusCode(500)
+					.setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
 					.setObjectBody(responseBody)
 					.build();
 		}
 
-		Response responseBody = new Response("Subscriber added successfully!", input);
+		Response responseBody = new Response("Subscriber added successfully!", output);
 		return ApiGatewayResponse.builder()
 				.setStatusCode(200)
+				.setHeaders(Collections.singletonMap("Access-Control-Allow-Origin", "*"))
 				.setObjectBody(responseBody)
 				.build();
 	}

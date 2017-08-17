@@ -4,22 +4,21 @@
 <!-- Page Content -->
 <div class="container">
   <div class="row">
-    <div class="col-lg-12 text-center">
-      <h1 class="mt-5">A Bootstrap 4 Starter Template</h1>
-      <p class="lead">Complete with pre-defined file paths and responsive navigation!</p>
+    <div class="col-lg-6 col-md-6 col-sm-12 text-center">
+      <h1 class="mt-5">Your Secure Video</h1>
+      <p class="lead">Click the play button to retrieve a pre-signed url to the video in the s3 bucket.</p>
       <ul class="list-unstyled">
-        <li>Bootstrap 4.0.0-beta</li>
-        <li>jQuery 3.2.1</li>
+        <li>{{currentUser.email}}</li>
+        <li><a [routerLink]="['/login']">Logout</a></li>
       </ul>
     </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-6 col-md-offset-3">
-      <h1>Hi {{currentUser.email}}!</h1>
-      <p>You're logged in with Angular 2!!</p>
-      <h3>All registered users:</h3>
-      <p><a [routerLink]="['/login']">Logout</a></p>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+      <ng-template #tipContent>Play the Video!</ng-template>
+      <a class="play-button" href="#" [ngbTooltip]="tipContent" (ngSubmit)="playVideo()">
+        <img src="/assets/play-button.svg" alt="Play Video">
+      </a>
     </div>
   </div>
 </div>
+
+

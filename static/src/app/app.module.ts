@@ -5,8 +5,8 @@ import { HttpModule } from '@angular/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 // used to create fake backend
-import { fakeBackendProvider } from './_helpers/index';
-import { MockBackend, MockConnection } from '@angular/http/testing';
+// import { fakeBackendProvider } from './_helpers/index';
+// import { MockBackend, MockConnection } from '@angular/http/testing';
 import { BaseRequestOptions } from '@angular/http';
 
 import { AppComponent } from './app.component';
@@ -19,7 +19,7 @@ import { AuthGuard } from './_guards/index';
 import { AlertService, AuthenticationService, UserService } from './_services/index';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
+import { ToggleComponent } from './toggle/toggle.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +29,7 @@ import { RegisterComponent } from './register/register.component';
     AlertComponent,
     HomeComponent,
     LoginComponent,
-    RegisterComponent,
+    ToggleComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,8 +45,8 @@ import { RegisterComponent } from './register/register.component';
     UserService,
 
     // providers used to create fake backend
-    fakeBackendProvider,
-    MockBackend,
+    // fakeBackendProvider,
+    // MockBackend,
     BaseRequestOptions
   ],
   bootstrap: [AppComponent]

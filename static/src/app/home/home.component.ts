@@ -12,6 +12,7 @@ export class HomeComponent implements OnInit {
 
   currentUser: User;
   users: User[] = [];
+  loading = false;
 
   constructor(private userService: UserService) {
     this.currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -19,6 +20,10 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
 
+  }
+
+  playVideo() {
+    this.loading = true;
   }
 
 }
