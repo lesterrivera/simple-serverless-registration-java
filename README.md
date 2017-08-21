@@ -59,6 +59,21 @@ has been separately verified using the `verifyToken` generated and sent over SES
     VERIFY_URL: https://www.myhost.com/verify.html
 ```
 
+## Viewing the website locally
+The sample website is built with angular 4 using bootstrap 4. When using the angular cli,
+you can view the website locally rather than thru the s3 bucket that serverless framework deploys. 
+
+To run the website locally, use the following commands:
+```bash
+
+$ cd static
+
+$ npm install
+
+$ ng serve
+
+```
+
 ## Synchronize contents to your S3 bucket
 You can deploy both private assets and the front-end website to your S3 buckets without deploying the serverless architecture as follows:
 

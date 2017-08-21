@@ -20,6 +20,8 @@ import { AlertService, AuthenticationService, UserService } from './_services/in
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { ToggleComponent } from './toggle/toggle.component';
+import { VgCoreModule } from 'videogular2/core';
+import { VgControlsModule } from 'videogular2/controls';
 
 @NgModule({
   declarations: [
@@ -36,7 +38,9 @@ import { ToggleComponent } from './toggle/toggle.component';
     FormsModule,
     HttpModule,
     NgbModule.forRoot(),
-    routing
+    routing,
+    VgCoreModule,
+    VgControlsModule
   ],
   providers: [
     AuthGuard,

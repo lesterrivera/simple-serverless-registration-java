@@ -12,11 +12,40 @@
         <li><a [routerLink]="['/login']">Logout</a></li>
       </ul>
     </div>
-    <div class="col-lg-6 col-md-6 col-sm-12">
+    <div *ngIf="!loading && !loaded" class="col-lg-6 col-md-6 col-sm-12">
       <ng-template #tipContent>Play the Video!</ng-template>
-      <a class="play-button" href="#" [ngbTooltip]="tipContent" (ngSubmit)="playVideo()">
+      <a class="play-button" href="#" [ngbTooltip]="tipContent" (click)="playVideo()">
         <img src="/assets/play-button.svg" alt="Play Video">
       </a>
+    </div>
+      <div *ngIf="loading && !loaded" class="col-lg-6 col-md-6 col-sm-12">
+        <i class="play-button fa fa-circle-o-notch fa-spin" style="font-size:97px;color:#E7865A"></i>
+      </div>
+    <div *ngIf="loaded" class="col-lg-6 col-md-6 col-sm-12">
+      <vg-player (onPlayerReady)="onPlayerReady($event)">
+        <vg-controls>
+          <vg-play-pause></vg-play-pause>
+          <vg-playback-button></vg-playback-button>
+
+          <vg-time-display vgProperty="current" vgFormat="mm:ss"></vg-time-display>
+
+          <vg-scrub-bar>
+            <vg-scrub-bar-current-time></vg-scrub-bar-current-time>
+            <vg-scrub-bar-buffering-time></vg-scrub-bar-buffering-time>
+          </vg-scrub-bar>
+
+          <vg-time-display vgProperty="total" vgFormat="mm:ss"></vg-time-display>
+
+          <vg-mute></vg-mute>
+          <vg-volume></vg-volume>
+
+          <vg-fullscreen></vg-fullscreen>
+        </vg-controls>
+
+        <video #media [vgMedia]="media" id="singleVideo" preload="auto" crossorigin>
+          <source [src]="videoUrl" type="video/mp4">
+        </video>
+      </vg-player>
     </div>
   </div>
 </div>

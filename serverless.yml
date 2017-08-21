@@ -65,6 +65,11 @@ provider:
               - {Ref: "AWS::AccountId"}
               - ":table/"
               - Ref: subscriberTable
+    -  Effect: "Allow"
+       Action:
+        - s3:PutObject
+        - s3:GetObject
+       Resource: {"Fn::Join": ["", ["arn:aws:s3:::", {Ref: PrivateAssets}, "/*"]]}
 
 # Packaging information for AWS Lambda
 package:
@@ -100,7 +105,7 @@ functions:
     events:
       - http:
           path: /api/sign
-          method: get
+          method: post
           authorizer: authorizeSubscriber
           cors:
             origins:
@@ -122,12 +127,15 @@ resources:
     PrivateAssets:
       Type: AWS::S3::Bucket
       Properties:
+        AccessControl: Private
         CorsConfiguration:
           CorsRules:
             - AllowedMethods:
                 - GET
                 - HEAD
               AllowedOrigins:
+                - "*"
+              AllowedHeaders:
                 - "*"
     ## S3 bucket for the Angular front-end website
     WebSite:

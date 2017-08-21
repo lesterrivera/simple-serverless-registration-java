@@ -51,4 +51,11 @@ public class TokenAuthorizerContext {
     public void setMethodArn(String methodArn) {
         this.methodArn = methodArn;
     }
+
+    @Override
+    public String toString() {
+        return "TokenAuthorizerContext [type=" + type
+                + ", authorizationToken=" + authorizationToken
+                + ", methodArn=" + methodArn + "]";
+    }
 }
