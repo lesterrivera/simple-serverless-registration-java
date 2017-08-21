@@ -88,6 +88,8 @@ If you wish to remove the AWS infrastructure created as a part of this project, 
 This will remove the IAM roles, any resources defined in serverless.yml, and destroy the CloudFormation stack.
 
 ```
+$ serverless deleteFromS3
+
 $ serverless remove
 
 Serverless: Getting all objects in S3 bucket...
